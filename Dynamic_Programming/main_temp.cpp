@@ -1,104 +1,56 @@
 #include <iostream>
 #include <vector>
-#include <queue>
 
 using namespace std;
 
+//	[R][C]: R 숫자에서 시작해서 C까지 합했을 때의 값
+int** memory;
+
 int main()
 {
-	int M, N;	cin >> M >> N;
-
-	int** data = new int*[M];
-	for (int i = 0; i < M; i++)
+	int N;
+	vector<int> arr;
+	cin >> N;
+	for (int i = 0, val; i < N; i++)
 	{
-		data[i] = new int[N];
-		for (int j = 0, val; j < N; j++)
+		scanf_s("%d", &val);
+		arr.push_back(val);
+	}
+
+	/*memory = new int*[N];
+	for (int i = 0; i < N; i++)
+	{
+		memory[i] = new int[N];
+		memory[0][0] = arr[0];
+		for (int j = 0; j < N; j++)
 		{
-			cin >> val;
-			data[i][j] = val;
+			memory[0][i] = memory[0][i - 1] + arr[i];
 		}
-	}
-
-	//	memory[i][j] = 시작점(0, 0)에서 (i, j)칸으로 갈 수 있는 경우의 수
-	unsigned long long** memory = new unsigned long long*[M];
-	for (int i = 0; i < M; i++)
-	{
-		memory[i] = new unsigned long long[N];
-		std::fill_n(memory[i], N, 0);
-	}
-	/*bool** checked = new bool*[M];
-	for (int i = 0; i < M; i++)
-	{
-		checked[i] = new bool[N];
-		std::fill_n(checked[i], N, false);
 	}*/
-	int** checked = new int*[M];
-	for (int i = 0; i < M; i++)
+
+	//	0부터 N까지 값의 합
+	int* mem = new int[N];
+	mem[0] = arr[0];
+	for (int i = 1; i < N; i++)
 	{
-		checked[i] = new int[N];
-		std::fill_n(checked[i], N, 0);
-		for (int j = 0; j < N; j++)
+		mem[i] = mem[i - 1] + arr[i];
+	}
+
+	//	N을 포함했을 때 가장 큰 값
+
+
+	//int answer = memory[0][0];
+	int answer = mem[0];
+	for (int i = 1; i < N; i++)
+	{
+		for (int j = i; j < N; j++)
 		{
-			if (j <= N - 2 && data[i][j] < data[i][j + 1])	//	From right
-			{
-				checked[i][j] += 1;
-			}
-			if (i <= M - 2 && data[i][j] < data[i + 1][j])	//	From Down
-			{
-				checked[i][j] += 1;
-			}
-			if (j >= 1 && data[i][j - 1] > data[i][j])		//	From left
-			{
-				checked[i][j] += 1;
-			}
-			if (i >= 1 && data[i - 1][j] > data[i][j])		//	From Up
-			{
-				checked[i][j] += 1;
-			}
+			//	memory[i][j] = 0번째부터 j번째까지의 합 - 0번째부터 i이전까지의 합
+			int temp = mem[j] - mem[i - 1];
+			if (temp > answer)
+				answer = temp;
 		}
 	}
 
-	memory[0][0] = 1;
-	queue<pair<int, int>> q;
-	q.push(make_pair(0, 1));
-	q.push(make_pair(1, 0));
-	while (!q.empty())
-	{
-		auto p = q.front();
-		q.pop();
-		int i = p.first, j = p.second;
-
-		if (j <= N - 2 && data[i][j] < data[i][j + 1])	//	From right
-		{
-			memory[i][j] += memory[i][j + 1];
-			checked[i][j] -= 1;
-		}
-		if (i <= M - 2 && data[i][j] < data[i + 1][j])	//	From Down
-		{
-			memory[i][j] += memory[i + 1][j];
-			checked[i][j] -= 1;
-		}
-		if (j >= 1 && data[i][j - 1] > data[i][j])	//	From left
-		{
-			memory[i][j] += memory[i][j - 1];
-			checked[i][j] -= 1;
-		}
-		if (i >= 1 && data[i - 1][j] > data[i][j])	//	From Up
-		{
-			memory[i][j] += memory[i - 1][j];
-			checked[i][j] -= 1;
-		}
-
-		if (checked[i][i] <= 0)
-			q.push(make_pair(i, j));
-	}
-
-	for (int i = 0; i < M; i++)
-	{
-		for (int j = 0; j < N; j++)
-			cout << memory[i][j];
-		cout << endl;
-	}
-
-	cout << memory[M - 1][N - 1];
+	cout << answer << endl;
 }
